@@ -78,6 +78,10 @@ export const login = asyncHandler(async (req, res) => {
 	return res.json({
 		message: "Logged In Successfully",
 		success: true,
+		// Also returned in the body so the SPA can use Bearer-token auth when
+		// cross-site cookies are blocked (e.g. frontend & backend on different domains).
+		token,
+		refreshToken,
 		user: {
 			id: existingUser._id,
 			username: existingUser.username,

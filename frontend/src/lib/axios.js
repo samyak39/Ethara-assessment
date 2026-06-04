@@ -2,32 +2,30 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
-	withCredentials: true, // send/receive httpOnly auth cookies cross-origin
+	withCredentials: true, // still send cookies when same-site (local dev)
 	headers: { "Content-Type": "application/json" },
 });
 
-// On 401, try a single refresh then replay the original request.
-let refreshing = null;
+// Attach the Bearer token (set at login) so auth works cross-domain even when
+// third-party cookies are blocked.
+axiosInstance.interceptors.request.use((config) => {
+	const token = localStorage.getItem("token");
+	if (token) config.headers.Authorization = `Bearer ${token}`;
+	return config;
+});
+
+// On 401, clear the token and bounce to login (no silent refresh needed —
+// the access token lasts 1 day).
 axiosInstance.interceptors.response.use(
 	(res) => res,
-	async (error) => {
-		const original = error.config;
+	(error) => {
 		const status = error.response?.status;
-		const isAuthCall = original?.url?.includes("/auth/login") || original?.url?.includes("/auth/refresh");
-
-		if (status === 401 && !original._retry && !isAuthCall) {
-			original._retry = true;
-			try {
-				refreshing = refreshing || axiosInstance.post("/auth/refresh");
-				await refreshing;
-				refreshing = null;
-				return axiosInstance(original);
-			} catch (e) {
-				refreshing = null;
-				if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
-					window.location.href = "/auth/login";
-				}
-				return Promise.reject(e);
+		const url = error.config?.url || "";
+		const isAuthCall = url.includes("/auth/login") || url.includes("/auth/register");
+		if (status === 401 && !isAuthCall) {
+			localStorage.removeItem("token");
+			if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
+				window.location.href = "/auth/login";
 			}
 		}
 		return Promise.reject(error);

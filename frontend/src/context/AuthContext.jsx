@@ -24,6 +24,8 @@ export function AuthProvider({ children }) {
 
 	const login = async (credentials) => {
 		const data = await login_api(credentials);
+		// Persist the access token for Bearer auth (works cross-domain).
+		if (data?.token) localStorage.setItem("token", data.token);
 		// login returns a trimmed user; fetch the full profile for consistency
 		await refreshUser();
 		return data;
@@ -33,6 +35,7 @@ export function AuthProvider({ children }) {
 		try {
 			await logout_api();
 		} finally {
+			localStorage.removeItem("token");
 			setUser(null);
 		}
 	};
