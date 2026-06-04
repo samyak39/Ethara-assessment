@@ -4,6 +4,10 @@ A role-based team task-management app (Trello/Asana-style) built as a **separate
 full-stack project**: a standalone **Express + MongoDB REST API** and a standalone
 **React (Vite) single-page app**.
 
+### 🌐 Live
+- **Backend API:** https://ethara-backend-2963.onrender.com (health: `/api/health`)
+- **Frontend:** _deploy on Render as a Static Site (see Deploy below)_
+
 ```
 .
 ├── backend/    → Express + Mongoose REST API   (port 4000)
@@ -41,9 +45,19 @@ Each app has its own `.env` (gitignored) — copy from the `.env.example` in eac
 folder. Backend needs a MongoDB connection string + `TOKEN_SECRET`; frontend needs
 `VITE_API_URL` pointing at the backend.
 
-## Deploy
-Deploy as **two services** (e.g. both on Railway, or backend on Railway + frontend
-on Vercel/Netlify). In production cookies use `SameSite=None; Secure`, so serve both
-over HTTPS and set the backend's `FRONTEND_URL` + frontend's `VITE_API_URL` to the
-deployed URLs. See [backend/README.md](backend/README.md) and
-[frontend/README.md](frontend/README.md) for step-by-step.
+## Deploy (Render — two services)
+
+**Backend** (Web Service) — already live at https://ethara-backend-2963.onrender.com
+- Root Directory: `backend` · Build: `npm install` · Start: `npm start`
+- Env vars: `NODE_ENV=production`, `PROD_DATABASE_URL`, `MONGODB_URI`, `TOKEN_SECRET`,
+  `FRONTEND_URL=<your frontend URL>` (Render provides `PORT` automatically)
+- In MongoDB Atlas → Network Access, allow `0.0.0.0/0` so Render can connect.
+
+**Frontend** (Static Site)
+- Root Directory: `frontend` · Build: `npm install && npm run build` · Publish: `dist`
+- Env var: `VITE_API_URL=https://ethara-backend-2963.onrender.com/api`
+- Add a rewrite rule: `/*` → `/index.html` (Rewrite) for client-side routing.
+
+After the frontend deploys, set the backend's `FRONTEND_URL` to the frontend's URL so
+CORS + cross-site cookies (`SameSite=None; Secure`) work. See
+[backend/README.md](backend/README.md) and [frontend/README.md](frontend/README.md).
