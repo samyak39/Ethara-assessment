@@ -1,0 +1,28 @@
+# ===== dependencies =====
+node_modules/
+**/node_modules/
+
+# ===== secrets / env (NEVER commit) =====
+.env
+**/.env
+*.local
+
+# ===== build output =====
+dist/
+**/dist/
+.next/
+**/.next/
+build/
+**/build/
+
+# ===== logs =====
+*.log
+**/*.log
+
+# ===== the original Next.js monolith is kept out of this repo =====
+ETHARA-PROJECT-TASK-MANAGER-FINAL/
+
+# ===== misc =====
+.DS_Store
+Thumbs.db
+.vscode/
